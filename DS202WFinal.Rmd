@@ -9,4 +9,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+primary = read.csv("WFPrimary.csv")
+primary <- subset(primary, select = -c(27, 33, 39:41, 45:50))
+```
+```{r}
+view(primary)
+```
 
