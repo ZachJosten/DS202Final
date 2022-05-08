@@ -66,9 +66,20 @@ temp$Name
 ```
 \
 \
-
+Here we now have 
 ```{r}
 primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=20) + scale_fill_discrete(type = finalcol)
 ```
 
+```{r}
+primeg %>% ggplot(aes(x=ShotType, fill=`Damage Type`)) + geom_bar(weight=nrow(primeg)) + scale_fill_discrete(type = finalcol)
+```
+
+```{r}
+primeg %>% ggplot(aes(x=Disposition, fill = ShotType)) + geom_histogram()
+```
+
+```{r}
+primeg %>% ggplot(aes(x = CritChance, y = CritMultiplier, color = `Damage Type`)) + geom_jitter() + scale_color_discrete(type = finalcol) + facet_wrap(~Class)
+```
 
