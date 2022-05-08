@@ -7,17 +7,68 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(tidyr)
-primary = read.csv("WFPrimary.csv")
-primary <- subset(primary, select = -c(27, 33, 39:41, 45:50))
+library(rlist)
 ```
+
 ```{r}
-view(primary)
+primary = read.csv("WFPrimary.csv")
+primary <- subset(primary, select = -c(27, 33, 38:41, 45:50))
 ```
+Starting off there are some columns that we will not be looking at and have removed for this reason. Many of these are just unimportant or information that isn't required and just add clutter to the information we do want to view.  
+e.g release dates, update releases, etc.  
+\
+\
+To start off, since we will be focusing mainly on elements of the weapons and the varying differences between them, we need to gather the multiple columns of elements into 2 columns one a key and one a value.
+```{r}
+primeg = gather(primary, "Damage Type", "Damage Value",4:17)
+primeg <- primeg %>% filter(`Damage Value` > 0)
+#This is done so we do not count those with no actual damage value in that respective element. 
+```
+\
+\
+Since we will be focusing primarily on elements, looking at the element spread across weapon classes makes for a good start.As for expectations on the element spread, I am expecting to see a large amount of Impact, Puncture and Slash overall, because these are the physical elements. As well I am also expecting to see large amounts of the basic elements, cold, electricity, toxin and fire. A bit of representation from the mixed elements is also expected, however I am guessing low amounts of gas, due to lacking usage. \
+```{r}
+primeg %>% ggplot(aes(x=Class, fill=`Damage Type`)) + geom_bar(weight=nrow(primeg))
+```
+\
+Glancing at the plot here, it is a bit too cluttered and there is low representation from some weapon classes, we will be removing these for readability and more focused analysis. Instead we will be focusing on the "main" classes. \
+```{r}
+primeg <- primeg %>% filter(Class %in% c("Arch-Gun", "Dual Pistols", "Bow", "Launcher", "Pistol", "Rifle", "Shotgun", "Sniper Rifle"))
+primeg$`Damage Type` = factor(primeg$`Damage Type`, levels=c('Impact', 'Puncture', 'Slash', 'Cold', 'Electricity', 'Heat', 'Toxin', 'Blast', 'Corrosive', 'Gas', 'Magnetic', 'Radiation', 'Viral', 'Void'))
+thecol = colors()[c(300, 153, 248, 131, 547, 553, 255, 507, 47, 81, 636, 654, 367, 8)]
+colrgb = col2rgb(thecol)
+finalcol = rgb(colrgb[1,], colrgb[2,], colrgb[3,], names = c('Impact', 'Puncture', 'Slash', 'Cold', 'Electricity', 'Heat', 'Toxin', 'Blast', 'Corrosive', 'Gas', 'Magnetic', 'Radiation', 'Viral', 'Void'), maxColorValue = 255)
+```
+\
+\
+We also want to factor our Damage Type variable in order to be able to relevel it. At the same time we can also add some colors to help distinguish the different elements. Meaning we now have something like this. \
+```{r}
+primeg %>% ggplot(aes(x=Class, fill=`Damage Type`)) + geom_bar(weight=nrow(primeg)) + scale_fill_discrete(type = finalcol)
+```
+From here we can see that Impact, Puncture and Slash are most definitely the most common damage types out of these, matching expectations. We can also see that as expected gas representation amongst all classes is quite low, with viral and corrosive also joining in that regard.  
+We can also see that the Rifle class holds the most weapons out of any of the classes, sitting at just above 400. 
+\
+\
+We can also take a look at the damage value spread from each of the element types.
+```{r}
+primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=10)
+```
+\
+Unfortunately there appears to be a slight problem with the outliers. The very large values of the outliers is making the plot difficult to read. But we can simply take out the major outliers in order to preserve some readability. Herre are the outliers which will not be included.
+```{r}
+temp = primeg %>% filter(`Damage Value` > 1000)
+primeg = primeg %>% filter(`Damage Value` <= 1000)
+temp$Name
+```
+\
+\
+
+```{r}
+primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=20) + scale_fill_discrete(type = finalcol)
+```
+
 
