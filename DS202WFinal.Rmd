@@ -39,9 +39,10 @@ Glancing at the plot here, it is a bit too cluttered and there is low representa
 ```{r}
 primeg <- primeg %>% filter(Class %in% c("Arch-Gun", "Dual Pistols", "Bow", "Launcher", "Pistol", "Rifle", "Shotgun", "Sniper Rifle"))
 primeg$`Damage Type` = factor(primeg$`Damage Type`, levels=c('Impact', 'Puncture', 'Slash', 'Cold', 'Electricity', 'Heat', 'Toxin', 'Blast', 'Corrosive', 'Gas', 'Magnetic', 'Radiation', 'Viral', 'Void'))
-thecol = colors()[c(300, 153, 248, 131, 547, 553, 255, 507, 47, 81, 636, 654, 367, 8)]
+thecol = colors()[c(599, 153, 300, 131, 547, 553, 255, 507, 47, 81, 636, 654, 367, 8)]
 colrgb = col2rgb(thecol)
 finalcol = rgb(colrgb[1,], colrgb[2,], colrgb[3,], names = c('Impact', 'Puncture', 'Slash', 'Cold', 'Electricity', 'Heat', 'Toxin', 'Blast', 'Corrosive', 'Gas', 'Magnetic', 'Radiation', 'Viral', 'Void'), maxColorValue = 255)
+
 ```
 \
 \
@@ -49,16 +50,17 @@ We also want to factor our Damage Type variable in order to be able to relevel i
 ```{r}
 primeg %>% ggplot(aes(x=Class, fill=`Damage Type`)) + geom_bar(weight=nrow(primeg)) + scale_fill_discrete(type = finalcol)
 ```
+\
 From here we can see that Impact, Puncture and Slash are most definitely the most common damage types out of these, matching expectations. We can also see that as expected gas representation amongst all classes is quite low, with viral and corrosive also joining in that regard.  
 We can also see that the Rifle class holds the most weapons out of any of the classes, sitting at just above 400. 
 \
 \
-We can also take a look at the damage value spread from each of the element types.
+We can also take a look at the damage value spread from each of the element types.I am primarily expecting Impact, Puncture and Slash to dominate most of the lower damage areas 
 ```{r}
 primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=10)
 ```
 \
-Unfortunately there appears to be a slight problem with the outliers. The very large values of the outliers is making the plot difficult to read. But we can simply take out the major outliers in order to preserve some readability. Herre are the outliers which will not be included.
+Unfortunately there appears to be a slight problem with the outliers. The very large values of the outliers is making the plot difficult to read. But we can simply take out the major outliers in order to preserve some readability. Here are the outliers which will not be included.
 ```{r}
 temp = primeg %>% filter(`Damage Value` > 1000)
 primeg = primeg %>% filter(`Damage Value` <= 1000)
@@ -66,20 +68,43 @@ temp$Name
 ```
 \
 \
-Here we now have 
+Here we now have a much more readable plot, along with the colors that we have previously implemented. 
 ```{r}
-primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=20) + scale_fill_discrete(type = finalcol)
+primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=30) + scale_fill_discrete(type = finalcol)
 ```
-
+\
+From this plot we can extrapolate a few things. Once again it shows us that the three "physical" damage types(Impact, Puncture and Slash) dominate the damage types that are in the game. However we can also see that low damage values are quite typical for most of the element types for all parts of a weapon. It is an important thing to note however, that while the physical types dominate the lowest damage values, this seem to change a bit as the damage numbers go up. We can see a SHARP decline in all damage at around the 50-60 damage mark. This is also the point at which the other element types seem to contribute a increased proportion to the bars. An interesting detail to note is that the number of weapons/shots appear to decrease as the damage value increases to around ~370.  But then there is a sharp increase at right around 400, perhaps a sweet spot for damage numbers on slower firing weapons. Past this point there is very little physical damage types seen, meaning the basic and mixed elements dominate the second half with what little amount there is. Blast seems to be the most common element among the higher damage values. 
+\
+\
+\
+Here we can add the facetting by class to get a glimpse at what is contributing where.
+```{r}
+primeg %>% ggplot(aes(x=`Damage Value`, fill=`Damage Type`)) + geom_histogram(binwidth=20) + scale_fill_discrete(type = finalcol) + facet_wrap(~Class)
+```
+\
+The most apparent is rifles contributing a high amount of physical damage on the low end, most likely due to high fire rate. Pistols and dual pistols also join rifles in this idea. Rifles also have the most damage type distribution. The others have a lot of physical mainly, except for archguns which are a bit of everything. Sniper rifles contribute the most to the mid range level of the lower damage scale.  
+\
+\
+\
+Next we will look at element distribution in terms of shot type. Largely expecting physical in the projectile and hitscan with large blast amounts in AOE and finally mainly basic and mixed elements in the discharge. 
 ```{r}
 primeg %>% ggplot(aes(x=ShotType, fill=`Damage Type`)) + geom_bar(weight=nrow(primeg)) + scale_fill_discrete(type = finalcol)
 ```
-
+\
+From this my expectations are largely correct. Physical completely dominates the hit-scan section, however I am surprised to see that the projectile section has a larger representation of non-physical elements in it. Discharge mostly follows expectations. AOE is also as expected heavily populated with blast, however there is a larger than expected physical damage in it and also a fair amount of representation from the other elements.
+\
+\
+\
+Following up on the shot type element spread, we are going to be looking at riven disposition. Once again no real understanding of this is required. The main idea of this disposition is that typically higher performing and more used weapons have lower disposition values, this is not always true but is typically a very good indicator of these things. Due to the recent efficacy and usage of AOE weapons, I am expecting their disposition to be on the lower side, everything else a bit middle average and spread out among everything else. 
 ```{r}
-primeg %>% ggplot(aes(x=Disposition, fill = ShotType)) + geom_histogram()
+primeg %>% ggplot(aes(x=Disposition, y = ShotType, color = ShotType)) + geom_boxplot()
 ```
-
+\
+As expected the median value of AOE weapons is lower than other categories and also having some very low outliers, most likely meaning high usage and performance of said weapons. Interestingly hit-scan weapons which is one of the larger categories has a slightly higher disposition than most others, save for discharge.  
+\
+\
+Next we will look at critical chance and critical multiplier across both elements and class. Overall I am expecting rifles, launchers and sniper rifles to have a fairly high trending critical chance to critical multiplier. I am also expecting mainly the physical damage types to have higher values of both critical attributes. I am also expecting to see similar things in blast. 
 ```{r}
-primeg %>% ggplot(aes(x = CritChance, y = CritMultiplier, color = `Damage Type`)) + geom_jitter() + scale_color_discrete(type = finalcol) + facet_wrap(~Class)
+primeg %>% ggplot(aes(x = CritChance, y = CritMultiplier, color = `Damage Type`, group = Class)) + geom_jitter() + geom_smooth(method = lm) + scale_color_discrete(type = finalcol) + facet_wrap(~Class) 
 ```
 
