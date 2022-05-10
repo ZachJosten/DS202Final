@@ -14,6 +14,18 @@ library(tidyr)
 library(rlist)
 ```
 
+For this project I will be analyzing some data on weapons from a game called "Warframe."
+For this project I will be analyzing a bunch of different things, however I will mainly be focusing on the question,\
+"How does the distribution of attributes on weapons get affected by the elements on weapons?"  
+\
+Absolutely all data comes from [here](https://warframe.fandom.com/wiki/WARFRAME_Wiki "here"). \
+More specifically the data comes from [this](https://warframe.fandom.com/wiki/Weapon_Comparison/CSV "this") page. Again none of the data is mine, I have simply used what has been compiled for some analysis.\
+\
+Some quick information on some key terms used in this project. \
+There are 13 elements that we will be looking at in this data. These elements are just different "types" that damage can be. \
+"Physical" elements refer to Impact, Puncture and Slash. \
+"Basic" elements refer to Cold, Electricity, Heat and Toxin. \
+"Mixed" elements refer to the remaining, Blast, Corrosive, Gas, Magnetic, Radiation and Viral. \
 ```{r}
 primary = read.csv("WFPrimary.csv")
 primary <- subset(primary, select = -c(27, 33, 38:41, 45:50))
@@ -107,4 +119,12 @@ Next we will look at critical chance and critical multiplier across both element
 ```{r}
 primeg %>% ggplot(aes(x = CritChance, y = CritMultiplier, color = `Damage Type`, group = Class)) + geom_jitter() + geom_smooth(method = lm) + scale_color_discrete(type = finalcol) + facet_wrap(~Class) 
 ```
-
+\
+From this we can see quite a few things of interest. Overall across all weapon classes, the most populated area seems to hover around the 0.2-0.25 critical chance and 2-2.5 critical multiplier. This is especially apparent from the rifle class due to it's large amount of weapons contained in it. Also from this we can see that the bow class is the most consistent across the board, with a critical multiplier of ~2 mostly across the board. Also note that sniper rifles seem to have a relatively higher average critical multiplier overall than most weapons. The trend line looks a little off for the sniper rifle class which is most likely due to low count, the last few points in that class seem to show an upward trend, however the points before those seem to drag down the trend line. Overall the trend line seems to be an increasing trend, with an increase in multiplier as chance increases. Arch-Guns seem to boast the steepest trend line out of all of these.  
+Looking at the element spread a bit more, it seems like the physical elements seem to be the most "average" out of all the element, typically finding themselves close to the before mentioned "clustered" area. Most basic elements seem to find themselves closer to trend line, though they seem to find themselves a little more spread out compared to the physical elements. Mixed elements on the other hand, while typically also seem to follow the trend line for most cases, have some that are much farther out than some. Main offenders of this seem to be radiation and corrosive, finding themselves off the trend line more often than others. Blast is another interesting element, it seems to find itself a bit more right than other, sometimes sporting a slightly lower critical multiplier but for higher critical chance. \
+Most of this is in line with my expectations, however I was expecting perhaps slightly higher values in the physical elements than what is seen here, but overall not far off. \
+\
+\
+\
+For some quick overall conclusions on this data. I believe it is safe to say that things such as the physical elements, have a pretty wide representation and act as a good average, yet consistent set of elements across the board. The basic elements seem to boast similar things yet they seem to find themselves able to shy away from the average quite a bit more than the physical elements. There is strong representation across the board of these elements, however some classes or shot types may contain more than others, overall mostly consistent but can definitely have some ones that pop out of the average. Mixed elements are ironically a bit of a mixed bag, they can be consistent in some cases and under specific circumstances, however there is an abundance that shy away from the average finding themselves having some more extreme attributes than typically seen in other element types. These mixed elements can sometimes almost fit in something akin to outliers in some cases. So overall while you may find small groups in these elements, they are much less consistent than others and may find there spot away from other points. \
+Overall I believe this analysis does a good job at looking at the data provided and seeing how elements do affect other variables. However, it is by no means perfect. Some problems include the fact that certain weapons may contain multiple "shots" but are counted separately other than by name, which may skew the graphs slightly, however this isn't something that can be fixed by anything means easily. On top of this some counts on certain variables, like some of the classes or element types are lower than their fellow variables, but in order to get a good look at some of the more extreme things and because I didn't want to exclude too many variables, these were kept but should be taken with a grain of salt when counts are lower. So while there are some problems with the analysis, I believe that it is a good look into the data and provides some very interesting insight to some distributions and information about the points in the data. 
